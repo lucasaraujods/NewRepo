@@ -1,0 +1,112 @@
+﻿@page "/funcionarios"
+@inject IFuncionarioService funcionarioService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+
+<div class="card">
+    <div class="card-header">
+        <h3>Funcionarios</h3>
+    </div>
+    <div class="card-body">
+        <div>
+            <button class="btn btn-success">Novo Funcionário</button>
+        </div>
+        @if (funcionarios == null)
+        {
+            <p><em> Carregando...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                     <tr>
+                         <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Email</th>
+                        <th>Ações</th>
+                     </tr>
+                </thead>
+                <tbody>
+                    @foreach(var funcionario in funcionarios)
+                    {
+                        <tr>
+                            <td>@funcionario.Nome</td>
+                            <td>@funcionario.Cpf</td>
+                            <td>@funcionario.Email</td>
+                            <td>
+                                <button @onclick="() => EditFuncionario(funcionario.Id)" class="btn btn-primary">Editar</button>
+                                <button class="btn btn-danger">Excluir</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+        }
+
+    </div>
+</div>
+
+@code {
+    private List<Funcionario> funcionarios;
+    private int currentPage = 1;
+    private int pageSize = 5; // Tamanho da página
+    private int totalRecords;
+    private int totalPages => (int)Math.Ceiling((double)totalRecords / pageSize);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFuncionarios();
+    }
+
+    private async Task LoadFuncionarios()
+    {
+        //var result = await FuncionarioService.GetFuncionariosPaginadoAsync(currentPage, pageSize);
+        var result = await funcionarioService.ObterTodosAsync();
+        funcionarios = result.ToList();
+        //funcionarios = result.Funcionarios.ToList();
+       //totalRecords = result.TotalCount;
+    }
+
+    private void EditFuncionario(int id)
+    {
+        Navigation.NavigateTo($"/funcionario/edit/{id}");
+    }
+
+    private void CreateFuncionario()
+    {
+        Navigation.NavigateTo("/funcionario/edit");
+    }
+
+   // private async Task DeleteFuncionario(int id)
+    //{
+    //    if (await funcionarioService (id))
+       // {
+     //       await LoadFuncionarios();
+        //}
+   // }
+
+    private async Task PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            await LoadFuncionarios();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (currentPage < totalPages)
+        {
+            currentPage++;
+            await LoadFuncionarios();
+        }
+    }
+
+    private bool HasPreviousPage => currentPage > 1;
+    private bool HasNextPage => currentPage < totalPages;
+
+
+}
